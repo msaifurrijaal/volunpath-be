@@ -6,14 +6,14 @@ import { seedRegencies } from './regency/regency.seed';
 const prisma = new PrismaClient();
 
 async function main() {
-    await seedRoles();
-    console.log('Role seeded successfully!');
+  await seedRoles();
+  console.log('Role seeded successfully!');
 
-    await seedProvinces();
-    console.log('Province seeded successfully!');
+  await seedProvinces();
+  console.log('Province seeded successfully!');
 
-    await seedRegencies();
-    console.log('Regency seeded successfully!');
+  await seedRegencies();
+  console.log('Regency seeded successfully!');
 }
 
 main()

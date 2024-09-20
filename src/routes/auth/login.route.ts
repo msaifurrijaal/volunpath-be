@@ -12,15 +12,12 @@ export const handler = async (
 ) => {
   try {
     const { email, password } = req.body;
-    console.log(email, password)
+
     const {
       services: { authService },
     } = req.app;
 
-    console.log('test')
-
     const result = await authService.login(email, password);
-    console.log(result)
 
     res.json({
       message: 'ok',

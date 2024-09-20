@@ -2,8 +2,11 @@ import { PrismaClient } from '@prisma/client';
 
 export class UserRepository {
   name = 'userRepository';
+  db: PrismaClient;
 
-  constructor(public db: PrismaClient) {}
+  constructor(db: PrismaClient) {
+    this.db = db;
+  }
 
   async findUserByEmail(email: string) {
     return this.db.user.findUnique({ where: { email } });

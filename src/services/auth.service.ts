@@ -1,11 +1,10 @@
 import bcrypt from 'bcrypt';
+import { z } from 'zod';
 import { jwtSign } from '../helpers/jwt';
 import config from '../config';
 import UserRepository from '../repositories/user.repository';
 import { JWTObject } from '../types/common';
-import throwIfNotEmail from '../helpers/throwIfNotEmail';
-import throwIfMissing from '../helpers/throwIfMissing';
-import { Error401 } from '../errors/http.errors';
+import { Error400, Error401 } from '../errors/http.errors';
 
 export class AuthService {
   name = 'authService';
@@ -16,15 +15,23 @@ export class AuthService {
   }
 
   async login(email: string, password: string) {
-    throwIfNotEmail(email, 'Invalid email format!', 400);
-    throwIfMissing(password, 'password is required!', 400);
+    const schema = z.object({
+      email: z.string().email({ message: 'Invalid email format!' }),
+      password: z.string().min(1, { message: 'Password is required!' }),
+    });
+
+    const parsedData = schema.safeParse({ email, password });
+    if (!parsedData.success) {
+      const errorMessage = parsedData.error.issues[0].message;
+      throw new Error400({ message: errorMessage });
+    }
 
     const data = await this.userRepository.findUserByEmail(email);
     if (!data) {
       throw new Error401({ message: 'Invalid email or password' });
     }
 
-    const isValid = await bcrypt.compare(password!, data.password);
+    const isValid = await bcrypt.compare(password, data.password);
     if (!isValid) {
       throw new Error401({ message: 'Invalid email or password' });
     }

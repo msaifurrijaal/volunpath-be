@@ -7,15 +7,11 @@ export interface AppServer<services = Services> extends Application {
 }
 
 export interface BaseRequest<services = Services>
-  extends Omit<
-    Request<object, any, any, any, Record<string, any>>,
-    'Application'
-  > {
+  extends Omit<Request<object, any, any, any, Record<string, any>>, 'Application'> {
   app: AppServer<services>;
 }
 
-export interface BaseResponse<Data = any>
-  extends Response<{ message: string; data?: Data }> {}
+export type BaseResponse<Data = any> = Response<{ message: string; data?: Data }>;
 
 export interface JWTObject {
   id: number;
@@ -23,6 +19,10 @@ export interface JWTObject {
   type?: 'access_token' | 'refresh_token';
 }
 
-export interface Repositories {}
+export interface Repositories {
+  [key: string]: any;
+}
 
-export interface Services {}
+export interface Services {
+  [key: string]: any;
+}

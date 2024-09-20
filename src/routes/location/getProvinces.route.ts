@@ -10,7 +10,8 @@ export const handler = async (
   res: BaseResponse,
 ) => {
   try {
-    let { limit, offset, search } = req.query;
+    let { limit, offset } = req.query;
+    const { search } = req.query;
     limit = limit ? parseInt(limit as string) : undefined;
     offset = offset ? parseInt(offset as string) : undefined;
 

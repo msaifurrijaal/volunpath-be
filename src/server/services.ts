@@ -17,11 +17,7 @@ const _populateRepositories = async (
 
   for (const item of paths) {
     if (item) {
-      console.log(
-        item
-          .replace(/.*\/repositories\//gi, './repositories/')
-          .replace('.js', '.ts'),
-      );
+      console.log(item.replace(/.*\/repositories\//gi, './repositories/').replace('.js', '.ts'));
       const { default: RepositoryClass } = await import(item);
 
       const repositoryClass = new RepositoryClass(db, config);
@@ -49,12 +45,10 @@ const _populateServices = async (ctx: {
   let services = {} as Services;
   for (const item of paths) {
     if (item) {
-      console.log(
-        item.replace(/.*\/services\//gi, './services/').replace('.js', '.ts'),
-      );
+      console.log(item.replace(/.*\/services\//gi, './services/').replace('.js', '.ts'));
       const { default: ServiceClass } = await import(item);
       const serviceClass = new ServiceClass(ctx);
-      
+
       services = {
         ...services,
         [serviceClass.name]: serviceClass,
@@ -74,8 +68,8 @@ const createService = async () => {
   const context = {
     repositories,
     config,
-  }
-  
+  };
+
   return await _populateServices(context);
 };
 

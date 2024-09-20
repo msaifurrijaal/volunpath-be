@@ -2,8 +2,11 @@ import { PrismaClient, Province } from '@prisma/client';
 
 export class LocationRepository {
   name = 'locationRepository';
+  db: PrismaClient;
 
-  constructor(public db: PrismaClient) {}
+  constructor(db: PrismaClient) {
+    this.db = db;
+  }
 
   async getProvinces({
     limit,

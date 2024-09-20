@@ -28,4 +28,4 @@ export const setupServer = async () => {
   });
 
   return app;
-}
+};

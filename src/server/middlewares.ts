@@ -10,11 +10,7 @@ const getMiddleWares = async () => {
 
   for (const item of paths) {
     if (item) {
-      console.log(
-        item
-          .replace(/.*\/middlewares\//gi, './middlewares/')
-          .replace('.js', '.ts'),
-      );
+      console.log(item.replace(/.*\/middlewares\//gi, './middlewares/').replace('.js', '.ts'));
       const { default: router } = await import(item);
 
       routers.push(router);

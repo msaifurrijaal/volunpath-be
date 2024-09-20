@@ -4,9 +4,7 @@ export class LocationService {
   name = 'locationService';
   locationRepository: LocationRepository;
 
-  constructor(ctx: {
-    repositories: { locationRepository: LocationRepository };
-  }) {
+  constructor(ctx: { repositories: { locationRepository: LocationRepository } }) {
     this.locationRepository = ctx.repositories.locationRepository;
   }
 

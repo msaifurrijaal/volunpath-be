@@ -10,9 +10,7 @@ const getRoutes = async () => {
 
   for (const item of paths) {
     if (item) {
-      console.log(
-        item.replace(/.*\/routes\//gi, './routes/').replace('.js', '.ts'),
-      );
+      console.log(item.replace(/.*\/routes\//gi, './routes/').replace('.js', '.ts'));
       const { default: router } = await import(item);
 
       routers.push(router);

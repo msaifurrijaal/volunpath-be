@@ -5,28 +5,28 @@ import errorHandler from '../helpers/errorHandler';
 import { jwtVerify } from '../helpers/jwt';
 
 const jwtMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    if(IGNORED_JWT_PATH.includes(req.path)) {
-        next();
-        return
+  if (IGNORED_JWT_PATH.includes(req.path)) {
+    next();
+    return;
+  }
+
+  for (const path in IGNORED_JWT_PATH_START_WITH) {
+    if (req.path.startsWith(path)) {
+      next();
+      return;
     }
+  }
 
-    for(const path in IGNORED_JWT_PATH_START_WITH) {
-        if(req.path.startsWith(path)) {
-            next();
-            return
-        }
-    }
+  try {
+    const jwt = req.headers.jwt;
 
-     try {
-       const jwt = req.headers.jwt;
-
-       throwIfMissing(jwt, 'jwt is required', 400);
-       const decodedJwt = jwtVerify(jwt as string);
-       req.headers.user = decodedJwt as any;
-       next();
-     } catch (error) {
-       errorHandler(error, res);
-     }
-}
+    throwIfMissing(jwt, 'jwt is required', 400);
+    const decodedJwt = jwtVerify(jwt as string);
+    req.headers.user = decodedJwt as any;
+    next();
+  } catch (error) {
+    errorHandler(error, res);
+  }
+};
 
 export default jwtMiddleware;

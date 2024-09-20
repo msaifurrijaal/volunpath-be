@@ -38,6 +38,4 @@ const config: ConfigProps = {
   },
 };
 
-
-
 export default config;
