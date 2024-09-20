@@ -17,6 +17,12 @@ export interface BaseRequest<services = Services>
 export interface BaseResponse<Data = any>
   extends Response<{ message: string; data?: Data }> {}
 
+export interface JWTObject {
+  id: number;
+  roleId: number | null;
+  type?: 'access_token' | 'refresh_token';
+}
+
 export interface Repositories {}
 
 export interface Services {}
