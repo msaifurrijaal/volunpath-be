@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "ts": "nodemon --exec ts-node src/index.ts",
+    "dev": "npx tsc --build -w | nodemon build/src",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint 'src/**/*.{ts,tsx}' --fix",
     "format": "prettier --write 'src/**/*.{ts,tsx}'"
@@ -17,6 +19,7 @@
   "dependencies": {
     "@prisma/client": "^5.19.1",
     "body-parser": "^1.20.3",
+    "chalk": "^5.3.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
@@ -24,6 +27,7 @@
     "prisma": "^5.19.1"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/node": "^22.5.5",
     "@typescript-eslint/eslint-plugin": "^8.6.0",
