@@ -4,6 +4,8 @@ import bodyParser from 'body-parser';
 import getMiddleWares from './middlewares';
 import getRoutes from './routes';
 import createService from './services';
+import generateSwagger from './swagger';
+import expressBasicAuth from 'express-basic-auth';
 
 export const setupServer = async () => {
   const app: any = express();
@@ -13,6 +15,13 @@ export const setupServer = async () => {
   app.use(express.json({ limit: '5mb' }));
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
+  const { serve, setup } = generateSwagger();
+  app.use(
+    '/docs',
+    expressBasicAuth({ users: { admin: 'admin@12345' }, challenge: true }),
+    serve,
+    setup,
+  );
 
   /** middleware */
   app.use(await getMiddleWares());

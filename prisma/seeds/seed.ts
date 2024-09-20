@@ -2,6 +2,8 @@ import { PrismaClient } from '@prisma/client';
 import { seedRoles } from './role/role.seed';
 import { seedProvinces } from './province/province.seed';
 import { seedRegencies } from './regency/regency.seed';
+import { seedSkills } from './skill/skill.seed';
+import { seedEducations } from './education/education.seed';
 
 const prisma = new PrismaClient();
 
@@ -14,6 +16,12 @@ async function main() {
 
   await seedRegencies();
   console.log('Regency seeded successfully!');
+
+  await seedSkills();
+  console.log('Skill seeded successfully!');
+
+  await seedEducations();
+  console.log('Education seeded successfully!');
 }
 
 main()

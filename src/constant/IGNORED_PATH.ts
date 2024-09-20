@@ -6,6 +6,8 @@ export const IGNORED_JWT_PATH = [
   '/countries',
   '/provinces',
   '/regencies',
+  '/educations',
+  '/skills',
   '/auth/otp-email',
   '/auth/login-email-otp',
   '/robots.txt',

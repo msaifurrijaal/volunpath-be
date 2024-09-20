@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import errorHandler from '../../helpers/errorHandler';
 import LocationService from '../../services/location.service';
 import { BaseRequest, BaseResponse } from '../../types/common';
+import errorHandler from '../../helpers/errorHandler';
 
 const router = Router();
 
@@ -10,8 +10,10 @@ export const handler = async (
   res: BaseResponse,
 ) => {
   try {
-    let { limit, offset } = req.query;
+    let { provinceId, limit, offset } = req.query;
     const { search } = req.query;
+
+    provinceId = provinceId ? parseInt(provinceId as string) : undefined;
     limit = limit ? parseInt(limit as string) : undefined;
     offset = offset ? parseInt(offset as string) : undefined;
 
@@ -19,7 +21,8 @@ export const handler = async (
       services: { locationService },
     } = req.app;
 
-    const result = await locationService.getProvinces({
+    const result = await locationService.getRegencies({
+      provinceId,
       limit,
       offset,
       search,
@@ -36,29 +39,35 @@ export const handler = async (
 
 /**
  * @swagger
- * /provinces:
- *   get:
- *     summary: Get provinces
- *     description: Get provinces
- *     tags:
- *       - Addresses
- *     parameters:
- *       - in: query
- *         name: limit
- *         schema:
- *           type: number
- *         description: limit
- *       - in: query
- *         name: offset
- *         schema:
- *           type: number
- *         description: offset
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: search
- *     responses:
+ * /regencies:
+ *  get:
+ *    summary: Get regencies
+ *    description: Get regencies
+ *    tags:
+ *      - Addresses
+ *    parameters:
+ *      - in: query
+ *        name: provinceId
+ *        schema:
+ *          type: number
+ *        required: true
+ *        description: provinceId
+ *      - in: query
+ *        name: limit
+ *        schema:
+ *          type: number
+ *        description: limit
+ *      - in: query
+ *        name: offset
+ *        schema:
+ *          type: number
+ *        description: offset
+ *      - in: query
+ *        name: search
+ *        schema:
+ *          type: string
+ *        description: search
+ *    responses:
  *       200:
  *         description: ok
  *         content:
@@ -72,7 +81,7 @@ export const handler = async (
  *                 data:
  *                   type: object
  *                   properties:
- *                     provinces:
+ *                     regencies:
  *                       type: array
  *                       items:
  *                         type: object
@@ -88,6 +97,6 @@ export const handler = async (
  *                 message:
  *                   type: string
  */
-const getProvincesRouter = router.get('/provinces', handler as any);
+const getRegenciesRoute = router.get('/regencies', handler as any);
 
-export default getProvincesRouter;
+export default getRegenciesRoute;

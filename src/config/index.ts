@@ -1,12 +1,16 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { readFileSync } from 'fs';
+import * as pkg from '../../package.json';
 
 dotenv.config();
 
 export type AppMode = 'prod' | 'dev';
 
 export interface ConfigProps {
+  name: string;
+  description: string;
+  version: string;
   mode?: AppMode;
   port: number;
   jwt: jwtProps;
@@ -21,6 +25,9 @@ export interface jwtProps {
 }
 
 const config: ConfigProps = {
+  name: pkg.name,
+  description: pkg.description,
+  version: pkg.version,
   mode: process.env.NODE_ENV as AppMode,
   port: parseInt(process.env.PORT ?? '3000'),
   jwt: {

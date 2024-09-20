@@ -9,31 +9,29 @@ datasource db {
 }
 
 model User {
-  id                    Int                   @id @default(autoincrement())
-  username              String                @unique
-  email                 String                @unique
-  password              String
-  fullname              String
-  phone                 String?
-  roleId                Int
-  volunteerDetailId     Int?                  @unique
-  organizationDetailId  Int?                  @unique
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  fullname  String
+  phone     String?
+  roleId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  registrations         Activity[]            @relation("UserRegistrations")
-  reports               Report[]              @relation("UserReports")
-  events                Event[]               @relation("OrganizerEvents")
-  volunteerDetail       VolunteerDetail?      @relation("UserVolunteerDetail")
-  organizationDetail    OrganizationDetail?   @relation("UserOrganizationDetail")
-  role                  Role                  @relation(fields: [roleId], references: [id])
+  registrations      Activity[]          @relation("UserRegistrations")
+  reports            Report[]            @relation("UserReports")
+  events             Event[]             @relation("OrganizerEvents")
+  volunteerDetail    VolunteerDetail?    @relation("UserVolunteerDetail")
+  organizationDetail OrganizationDetail? @relation("UserOrganizationDetail")
+  role               Role                @relation(fields: [roleId], references: [id])
 
   @@map("users")
 }
 
 model Role {
-  id    Int    @id @default(autoincrement())
-  name  String @unique
+  id   Int    @id @default(autoincrement())
+  name String @unique
 
   users User[]
 
@@ -41,103 +39,134 @@ model Role {
 }
 
 model Province {
-  id                   Int                   @id @default(autoincrement())
-  name                 String                @unique
-  regencies            Regency[]             
-  volunteerDetails     VolunteerDetail[]     
-  organizationDetails  OrganizationDetail[]  
+  id                  Int                  @id @default(autoincrement())
+  name                String               @unique
+  regencies           Regency[]
+  volunteerDetails    VolunteerDetail[]
+  organizationDetails OrganizationDetail[]
 
   @@map("provinces")
 }
 
 model Regency {
-  id                   Int                   @id @default(autoincrement())
-  name                 String                @unique
-  provinceId           Int
-  province             Province              @relation(fields: [provinceId], references: [id])
-  volunteerDetails     VolunteerDetail[]     
-  organizationDetails  OrganizationDetail[]  
+  id                  Int                  @id @default(autoincrement())
+  name                String               @unique
+  provinceId          Int
+  province            Province             @relation(fields: [provinceId], references: [id])
+  volunteerDetails    VolunteerDetail[]
+  organizationDetails OrganizationDetail[]
 
   @@map("regencies")
 }
 
 model VolunteerDetail {
-  id           Int       @id @default(autoincrement())
-  userId       Int       @unique
-  skills       String
-  education    String
-  otherDetails String?   @db.Text
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique
+  educationId  Int
+  otherDetails String?  @db.Text
   address      String?
   provinceId   Int?
   regencyId    Int?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  user         User      @relation("UserVolunteerDetail", fields: [userId], references: [id])
-  province     Province? @relation(fields: [provinceId], references: [id])
-  regency      Regency?  @relation(fields: [regencyId], references: [id])
+  user            User             @relation("UserVolunteerDetail", fields: [userId], references: [id])
+  education       Education        @relation(fields: [educationId], references: [id])
+  province        Province?        @relation(fields: [provinceId], references: [id])
+  regency         Regency?         @relation(fields: [regencyId], references: [id])
+  volunteerSkills VolunteerSkill[] @relation("VolunteerSkills")
 
   @@map("volunteer_details")
 }
 
-model OrganizationDetail {
-  id           Int                   @id @default(autoincrement())
-  userId       Int                   @unique
-  name         String
-  address      String?
-  provinceId   Int?
-  regencyId    Int?
-  description  String                @db.Text
-  typeId       Int
-  createdAt    DateTime              @default(now())
-  updatedAt    DateTime              @updatedAt
+model Education {
+  id          Int               @id @default(autoincrement())
+  name        String            @unique
+  description String?           @db.Text
+  details     VolunteerDetail[]
 
-  user         User                  @relation("UserOrganizationDetail", fields: [userId], references: [id])
-  province     Province?             @relation(fields: [provinceId], references: [id])
-  regency      Regency?              @relation(fields: [regencyId], references: [id])
-  category     CategoryOrganization   @relation(fields: [typeId], references: [id])
+  @@map("educations")
+}
+
+model Skill {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  description String?          @db.Text
+  volunteers  VolunteerSkill[] @relation("SkillVolunteers")
+
+  @@map("skills")
+}
+
+model VolunteerSkill {
+  id                Int @id @default(autoincrement())
+  volunteerDetailId Int
+  skillId           Int
+
+  volunteerDetail VolunteerDetail @relation("VolunteerSkills", fields: [volunteerDetailId], references: [id])
+  skill           Skill           @relation("SkillVolunteers", fields: [skillId], references: [id])
+
+  @@unique([volunteerDetailId, skillId])
+  @@map("volunteer_skills")
+}
+
+model OrganizationDetail {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique
+  name        String
+  address     String?
+  provinceId  Int?
+  regencyId   Int?
+  description String   @db.Text
+  categoryOrganizationId      Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user     User                 @relation("UserOrganizationDetail", fields: [userId], references: [id])
+  province Province?            @relation(fields: [provinceId], references: [id])
+  regency  Regency?             @relation(fields: [regencyId], references: [id])
+  category CategoryOrganization @relation(fields: [categoryOrganizationId], references: [id])
 
   @@map("organization_details")
 }
 
 model CategoryOrganization {
-  id            Int                   @id @default(autoincrement())
-  name          String                @unique
-  description   String?               @db.Text
+  id            Int                  @id @default(autoincrement())
+  name          String               @unique
+  description   String?              @db.Text
   organizations OrganizationDetail[]
 
   @@map("category_organizations")
 }
 
 model Event {
-  id              Int          @id @default(autoincrement())
-  organizerId     Int
-  title           String
-  description     String       @db.Text
-  additionalInfo  String?      @db.Text
-  date            DateTime
-  location        String
-  slotsNeeded     Int
-  slotsAvailable  Int
-  categoryId      Int?
-  status          StatusEvent
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  id             Int         @id @default(autoincrement())
+  organizerId    Int
+  title          String
+  description    String      @db.Text
+  additionalInfo String?     @db.Text
+  date           DateTime
+  location       String
+  slotsNeeded    Int
+  slotsAvailable Int
+  categoryEventId     Int?
+  status         StatusEvent
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
-  organizer       User         @relation("OrganizerEvents", fields: [organizerId], references: [id])
-  category        CategoryEvent? @relation(fields: [categoryId], references: [id])
-  registrations   Activity[]   @relation("EventRegistrations")
-  reports         Report[]     @relation("EventReports")
-  images          Image[]      @relation("EventImages")
+  organizer     User           @relation("OrganizerEvents", fields: [organizerId], references: [id])
+  category      CategoryEvent? @relation(fields: [categoryEventId], references: [id])
+  registrations Activity[]     @relation("EventRegistrations")
+  reports       Report[]       @relation("EventReports")
+  images        Image[]        @relation("EventImages")
 
   @@map("events")
 }
 
 model Image {
-  id      Int     @id @default(autoincrement())
+  id      Int    @id @default(autoincrement())
   value   String
   eventId Int?
-  event   Event?  @relation("EventImages", fields: [eventId], references: [id])
+  event   Event? @relation("EventImages", fields: [eventId], references: [id])
 
   @@map("images")
 }
@@ -160,8 +189,8 @@ model Activity {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
-  volunteer      User           @relation("UserRegistrations", fields: [volunteerId], references: [id])
-  event          Event          @relation("EventRegistrations", fields: [eventId], references: [id])
+  volunteer User  @relation("UserRegistrations", fields: [volunteerId], references: [id])
+  event     Event @relation("EventRegistrations", fields: [eventId], references: [id])
 
   @@map("activities")
 }
@@ -187,8 +216,8 @@ model Report {
   feedback    String?  @db.Text
   createdAt   DateTime @default(now())
 
-  event       Event    @relation("EventReports", fields: [eventId], references: [id])
-  volunteer   User     @relation("UserReports", fields: [volunteerId], references: [id])
+  event     Event @relation("EventReports", fields: [eventId], references: [id])
+  volunteer User  @relation("UserReports", fields: [volunteerId], references: [id])
 
   @@map("reports")
 }
@@ -200,7 +229,7 @@ model CategoryEvent {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  events      Event[]
+  events Event[]
 
   @@map("category_events")
 }

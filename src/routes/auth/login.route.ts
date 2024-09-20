@@ -28,6 +28,55 @@ export const handler = async (
   }
 };
 
-const postLoginRouter = router.post('/auth/login', handler as any);
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: User login
+ *     description: Retreive JWT token for user login succesfully
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 required: true
+ *               password:
+ *                 type: string
+ *                 required: true
+ *     responses:
+ *       200:
+ *         description: Login successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: ok
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                     refreshToken:
+ *                       type: string
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
+const postLoginRoute = router.post('/auth/login', handler as any);
 
-export default postLoginRouter;
+export default postLoginRoute;
