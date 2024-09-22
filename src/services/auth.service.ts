@@ -5,6 +5,7 @@ import config from '../config';
 import UserRepository from '../repositories/user.repository';
 import { JWTObject } from '../types/common';
 import { Error400, Error401 } from '../errors/http.errors';
+import { CreateUserOrganizationReq, CreateUserVolunteerReq } from '../types/apps/user.type';
 
 export class AuthService {
   name = 'authService';
@@ -44,6 +45,31 @@ export class AuthService {
     };
   }
 
+  async registerVolunteerUser(data: CreateUserVolunteerReq) {
+    const schema = z.object({
+      username: z.string().min(3, { message: 'Username must be at least 3 characters long.' }),
+      email: z.string().email({ message: 'Invalid email format!' }),
+      password: z.string().min(6, { message: 'Password must be at least 6 characters long.' }),
+      fullname: z.string().min(1, { message: 'Fullname is required.' }),
+      phone: z.string().optional(),
+      volunteerDetail: z.object({
+        educationId: z.number(),
+        otherDetails: z.string().optional(),
+        address: z.string().optional(),
+        provinceId: z.number().optional(),
+        regencyId: z.number().optional(),
+      }),
+    });
+
+    const parsedData = schema.safeParse(data);
+    if (!parsedData.success) {
+      const errorMessage = parsedData.error.issues[0].message;
+      throw new Error(`Validation Error: ${errorMessage}`);
+    }
+
+    return this.userRepository.createUserVolunteer(data);
+  }
+
   async generateTokens(payload: JWTObject) {
     const accessToken = jwtSign(
       { ...payload, type: 'access_token' },
@@ -55,6 +81,34 @@ export class AuthService {
     );
 
     return { accessToken, refreshToken };
+  }
+
+  async registerOrganizationUser(data: CreateUserOrganizationReq) {
+    const schema = z.object({
+      username: z.string().min(3, { message: 'Username must be at least 3 characters long.' }),
+      email: z.string().email({ message: 'Invalid email format!' }),
+      password: z.string().min(6, { message: 'Password must be at least 6 characters long.' }),
+      fullname: z.string().min(1, { message: 'Fullname is required.' }),
+      phone: z.string().optional(),
+      organizationDetail: z.object({
+        name: z.string().max(255, { message: 'Name must be at most 255 characters long.' }),
+        address: z.string().optional(),
+        provinceId: z.number().optional(),
+        regencyId: z.number().optional(),
+        description: z
+          .string()
+          .max(900, { message: 'Description must be at most 900 characters long.' }),
+        categoryOrganizationId: z.number(),
+      }),
+    });
+
+    const parsedData = schema.safeParse(data);
+    if (!parsedData.success) {
+      const errorMessage = parsedData.error.issues[0].message;
+      throw new Error(`Validation Error: ${errorMessage}`);
+    }
+
+    return this.userRepository.createUserOrganization(data);
   }
 }
 

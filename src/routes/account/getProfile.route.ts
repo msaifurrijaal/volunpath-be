@@ -28,6 +28,43 @@ export const handler = async (
   }
 };
 
+/**
+ * @swagger
+ * /account/profile:
+ *   get:
+ *     summary: Get profile
+ *     description: Get profile
+ *     tags:
+ *       - Account
+ *     parameters:
+ *       - in: header
+ *         name: jwt
+ *         schema:
+ *           type: string
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: ok
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: ok
+ *                 data:
+ *                   type: object
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 const getProfileRouter = router.get('/account/profile', handler as any);
 
 export default getProfileRouter;

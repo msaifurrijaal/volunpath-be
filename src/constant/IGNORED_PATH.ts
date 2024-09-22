@@ -1,8 +1,8 @@
 export const IGNORED_JWT_PATH = [
   '/auth/login',
-  '/auth/cashier/login',
   '/auth/refresh-token',
-  '/auth/register',
+  '/auth/register/volunteer',
+  '/auth/register/organization',
   '/countries',
   '/provinces',
   '/regencies',
