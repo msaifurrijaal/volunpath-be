@@ -1,8 +1,10 @@
 import { setupServer } from './server';
 import config from './config';
 
+let app: any;
+
 async function run() {
-  const app = await setupServer();
+  app = await setupServer(); // Inisialisasi server
   app.listen(config.port, () => {
     console.log(`
     ==========================================
@@ -13,3 +15,5 @@ async function run() {
 }
 
 run();
+
+export { app };

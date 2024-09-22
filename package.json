@@ -8,6 +8,7 @@
     "build": "rm -r build | npx tsc --build",
     "ts": "nodemon --exec ts-node src/index.ts",
     "dev": "npx tsc --build -w | nodemon build/src",
+    "postinstall": "prisma generate && npx prisma migrate deploy && npx prisma db seed",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
@@ -22,6 +23,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.19.1",
+    "@vercel/node": "^3.2.15",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
     "chalk": "^5.3.0",

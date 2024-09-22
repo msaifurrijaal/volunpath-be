@@ -1,6 +1,4 @@
 import dotenv from 'dotenv';
-import path from 'path';
-import { readFileSync } from 'fs';
 import * as pkg from '../../package.json';
 
 dotenv.config();
@@ -20,8 +18,8 @@ export interface jwtProps {
   keysPath?: string;
   expired?: string;
   refreshExpired?: string;
-  privateKey: Buffer;
-  publicKey: Buffer;
+  privateKey: string;
+  publicKey: string;
 }
 
 const config: ConfigProps = {
@@ -35,12 +33,18 @@ const config: ConfigProps = {
     expired: process.env.JWT_EXPIRED_TIME,
     refreshExpired: process.env.JWT_REFRESH_EXPIRED_TIME,
     get privateKey() {
-      const privateKeyPath: string = path.join(this.keysPath!, 'private.key');
-      return readFileSync(privateKeyPath);
+      const privateKey = process.env.PRIVATE_KEY;
+      if (!privateKey) {
+        throw new Error('Private key is not defined in environment variables');
+      }
+      return privateKey.replace(/\\n/g, '\n');
     },
     get publicKey() {
-      const publicKeyPath: string = path.join(this.keysPath!, 'public.key');
-      return readFileSync(publicKeyPath);
+      const publicKey = process.env.PUBLIC_KEY;
+      if (!publicKey) {
+        throw new Error('Public key is not defined in environment variables');
+      }
+      return publicKey.replace(/\\n/g, '\n');
     },
   },
 };
