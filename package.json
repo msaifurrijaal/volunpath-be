@@ -4,9 +4,10 @@
   "description": "REST API for Volunpath application",
   "main": "index.js",
   "scripts": {
-    "start": "node build/src",
+    "start": "node build",
+    "build": "rm -r build | npx tsc --build",
     "ts": "nodemon --exec ts-node src/index.ts",
-    "dev": "npx tsc --build -w | nodemon build/src",
+    "dev": "npx tsc --build -w | nodemon build",
     "postinstall": "prisma generate && npx prisma migrate deploy && npx prisma db seed",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .ts",
