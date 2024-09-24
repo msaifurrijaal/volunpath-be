@@ -1,11 +1,12 @@
 import bcrypt from 'bcrypt';
 import { z } from 'zod';
-import { jwtSign } from '../helpers/jwt';
+import { jwtSign, jwtVerify } from '../helpers/jwt';
 import config from '../config';
 import UserRepository from '../repositories/user.repository';
 import { JWTObject } from '../types/common';
 import { Error400, Error401 } from '../errors/http.errors';
 import { CreateUserOrganizationReq, CreateUserVolunteerReq } from '../types/apps/user.type';
+import { JwtPayload } from 'jsonwebtoken';
 
 export class AuthService {
   name = 'authService';
@@ -41,6 +42,43 @@ export class AuthService {
       ...(await this.generateTokens({
         id: data.id,
         roleId: data.roleId,
+      })),
+    };
+  }
+
+  async refreshToken(refreshToken: string) {
+    const schema = z.object({
+      refreshToken: z.string().min(1, { message: 'Refresh token is required!' }),
+    });
+
+    const parsedData = schema.safeParse({ refreshToken });
+    if (!parsedData.success) {
+      const errorMessage = parsedData.error.issues[0].message;
+      throw new Error400({ message: errorMessage });
+    }
+
+    let decodedJwt: JwtPayload;
+
+    try {
+      decodedJwt = jwtVerify(refreshToken) as JwtPayload;
+    } catch (error) {
+      throw new Error401({ message: 'Invalid refresh token' });
+    }
+
+    if (decodedJwt.type !== 'refresh_token') {
+      throw new Error401({ message: 'Invalid refresh token' });
+    }
+
+    const user = await this.userRepository.findUserById(decodedJwt.id);
+
+    if (!user) {
+      throw new Error401({ message: 'Invalid refresh token' });
+    }
+
+    return {
+      ...(await this.generateTokens({
+        id: user.id,
+        roleId: user.role.id,
       })),
     };
   }

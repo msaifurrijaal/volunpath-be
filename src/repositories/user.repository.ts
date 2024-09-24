@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient, User } from '@prisma/client';
 import { CreateUserOrganizationReq, CreateUserVolunteerReq } from '../types/apps/user.type';
 import bcrypt from 'bcrypt';
 import { Error400 } from '../errors/http.errors';
@@ -112,6 +112,46 @@ export class UserRepository {
       }
       throw error;
     }
+  }
+
+  async getUsers({
+    roleId,
+    limit = 10,
+    offset = 0,
+    search,
+  }: {
+    roleId: number;
+    limit?: number;
+    offset?: number;
+    search: string;
+  }): Promise<{ users: Omit<User, 'password' | 'roleId'>[]; total: number }> {
+    const total = await this.db.user.count({
+      where: { fullname: { contains: search, mode: 'insensitive' }, roleId },
+    });
+
+    const take = limit === -1 ? undefined : limit;
+    const skip = limit === -1 ? undefined : offset;
+
+    const users = await this.db.user.findMany({
+      where: { fullname: { contains: search, mode: 'insensitive' }, roleId },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        fullname: true,
+        phone: true,
+        createdAt: true,
+        updatedAt: true,
+        role: true,
+        organizationDetail: true,
+        volunteerDetail: true,
+      },
+      take,
+      skip,
+      orderBy: { id: 'desc' },
+    });
+
+    return { users, total };
   }
 }
 

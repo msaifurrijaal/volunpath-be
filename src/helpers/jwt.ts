@@ -15,7 +15,6 @@ export const jwtSign = (
   if (canExpired) {
     signOptions.expiresIn = parseInt(expiredTime ?? expired!);
   }
-  console.log(config.jwt.privateKey);
   return jwt.sign(payload, privateKey, signOptions);
 };
 
