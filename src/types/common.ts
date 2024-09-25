@@ -1,5 +1,7 @@
 import { Application, Request, Response } from 'express';
 import { ConfigProps } from '../config';
+import { SupabaseClient } from '@supabase/supabase-js';
+import SupabaseConnector from '../connectors/supabase.connector';
 
 export interface AppServer<services = Services> extends Application {
   services: services;
@@ -17,6 +19,14 @@ export interface JWTObject {
   id: number;
   roleId: number | null;
   type?: 'access_token' | 'refresh_token';
+}
+
+export interface ConnectorClients {
+  supabase: SupabaseClient;
+}
+
+export interface Connectors {
+  supabaseConnector: SupabaseConnector;
 }
 
 export interface Repositories {

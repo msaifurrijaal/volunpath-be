@@ -12,6 +12,11 @@ export interface ConfigProps {
   mode?: AppMode;
   port: number;
   jwt: jwtProps;
+  supabase: {
+    url: string;
+    key: string;
+    bucketName: string;
+  };
 }
 
 export interface jwtProps {
@@ -46,6 +51,11 @@ const config: ConfigProps = {
       }
       return publicKey.replace(/\\n/g, '\n');
     },
+  },
+  supabase: {
+    url: process.env.SUPABASE_URL || '',
+    key: process.env.SUPABASE_KEY || '',
+    bucketName: process.env.SUPABASE_BUCKET_NAME || '',
   },
 };
 

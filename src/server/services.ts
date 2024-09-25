@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import config, { ConfigProps } from '../config';
-import { Repositories, Services } from '../types/common';
+import { ConnectorClients, Connectors, Repositories, Services } from '../types/common';
 import pathResolver from '../helpers/pathResolver';
 import dbConnection from '../factories/dbConnection';
+import supabaseConnection from '../factories/supabaseConnection';
 
 const _populateRepositories = async (
   db: PrismaClient,
@@ -33,8 +34,38 @@ const _populateRepositories = async (
   return repositories;
 };
 
+const _populateConnectors = async (
+  clients: ConnectorClients,
+  config: ConfigProps,
+): Promise<Connectors> => {
+  const paths = await pathResolver(__dirname + '/../connectors', {
+    includes: ['.connector.js', '.connector.ts'],
+  });
+  console.log(`\nBuilding connectors`);
+
+  let connectors = {} as Connectors;
+  for (const item of paths) {
+    if (item) {
+      console.log(item.replace(/.*\/connectors\//gi, './connectors/').replace('.js', '.ts'));
+      const { default: ConnectorClass } = await import(item);
+
+      const connectorClass = new ConnectorClass({ clients, config });
+
+      connectors = {
+        ...connectors,
+        [connectorClass.name]: connectorClass,
+      };
+    }
+  }
+
+  console.log(`Success built ${paths.length} connectors`);
+
+  return connectors;
+};
+
 const _populateServices = async (ctx: {
   repositories: Repositories;
+  connectors: Connectors;
   config: ConfigProps;
 }): Promise<Services> => {
   const paths = await pathResolver(__dirname + '/../services', {
@@ -62,11 +93,16 @@ const _populateServices = async (ctx: {
 };
 
 const createService = async () => {
+  const connectorClient: ConnectorClients = {
+    supabase: await supabaseConnection(),
+  };
   const postgresSql = await dbConnection();
   const repositories = await _populateRepositories(postgresSql, config);
+  const connectors = await _populateConnectors(connectorClient, config);
 
   const context = {
     repositories,
+    connectors,
     config,
   };
 
