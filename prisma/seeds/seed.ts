@@ -5,6 +5,7 @@ import { seedRegencies } from './regency/regency.seed';
 import { seedSkills } from './skill/skill.seed';
 import { seedEducations } from './education/education.seed';
 import { seedCategoryOrganizations } from './categoryOrganization';
+import { seedCategoryEvents } from './categoryEvent';
 
 const prisma = new PrismaClient();
 
@@ -26,6 +27,9 @@ async function main() {
 
   await seedCategoryOrganizations();
   console.log('Category Organization seeded successfully!');
+
+  await seedCategoryEvents();
+  console.log('Category Event seeded successfully!');
 }
 
 main()

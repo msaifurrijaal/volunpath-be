@@ -44,6 +44,7 @@ model Province {
   regencies           Regency[]
   volunteerDetails    VolunteerDetail[]
   organizationDetails OrganizationDetail[]
+  events              Event[]
 
   @@map("provinces")
 }
@@ -55,6 +56,7 @@ model Regency {
   province            Province             @relation(fields: [provinceId], references: [id])
   volunteerDetails    VolunteerDetail[]
   organizationDetails OrganizationDetail[]
+  events              Event[]
 
   @@map("regencies")
 }
@@ -110,16 +112,16 @@ model VolunteerSkill {
 }
 
 model OrganizationDetail {
-  id          Int      @id @default(autoincrement())
-  userId      Int      @unique
-  name        String
-  address     String?
-  provinceId  Int?
-  regencyId   Int?
-  description String   @db.Text
-  categoryOrganizationId      Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                     Int      @id @default(autoincrement())
+  userId                 Int      @unique
+  name                   String
+  address                String?
+  provinceId             Int?
+  regencyId              Int?
+  description            String   @db.Text
+  categoryOrganizationId Int
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 
   user     User                 @relation("UserOrganizationDetail", fields: [userId], references: [id])
   province Province?            @relation(fields: [provinceId], references: [id])
@@ -139,21 +141,25 @@ model CategoryOrganization {
 }
 
 model Event {
-  id             Int         @id @default(autoincrement())
-  organizerId    Int
-  title          String
-  description    String      @db.Text
-  additionalInfo String?     @db.Text
-  date           DateTime
-  location       String
-  slotsNeeded    Int
-  slotsAvailable Int
-  categoryEventId     Int?
-  status         StatusEvent
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  id              Int         @id @default(autoincrement())
+  organizerId     Int
+  title           String
+  description     String      @db.Text
+  additionalInfo  String?     @db.Text
+  date            DateTime
+  location        String
+  provinceId      Int
+  regencyId       Int
+  slotsNeeded     Int
+  slotsAvailable  Int
+  categoryEventId Int?
+  status          StatusEvent
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
   organizer     User           @relation("OrganizerEvents", fields: [organizerId], references: [id])
+  province      Province       @relation(fields: [provinceId], references: [id])
+  regency       Regency        @relation(fields: [regencyId], references: [id])
   category      CategoryEvent? @relation(fields: [categoryEventId], references: [id])
   registrations Activity[]     @relation("EventRegistrations")
   reports       Report[]       @relation("EventReports")
