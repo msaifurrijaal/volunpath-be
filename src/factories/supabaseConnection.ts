@@ -6,7 +6,7 @@ const supabaseConnection = async () => {
   const {
     supabase: { url, key },
   } = config;
-  console.log({ url, key });
+
   const supabaseClient = createClient(url, key);
 
   console.log('Connected to Supabase');

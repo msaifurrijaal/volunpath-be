@@ -36,7 +36,7 @@ export const handler = async (
       services: { supabaseService },
     } = req.app;
     const result = await supabaseService.getUploadUrl({
-      userId: id,
+      userId: id.toString(),
       bucketFolder,
       fileName,
     });
