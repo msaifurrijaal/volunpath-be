@@ -1,15 +1,21 @@
 import { z } from 'zod';
 import EventRepository from '../repositories/event.repository';
-import { CreateEventReq } from '../types/apps/event.type';
-import { Error404 } from '../errors/http.errors';
+import { CreateEventReq, UpdateEventReq } from '../types/apps/event.type';
+import { Error400, Error404 } from '../errors/http.errors';
 import { StatusEvent } from '@prisma/client';
+import SupabaseConnector from '../connectors/supabase.connector';
 
 export class EventService {
   name = 'eventService';
   eventRepository: EventRepository;
+  supabaseConnector: SupabaseConnector;
 
-  constructor(ctx: { repositories: { eventRepository: EventRepository } }) {
+  constructor(ctx: {
+    repositories: { eventRepository: EventRepository };
+    connectors: { supabaseConnector: SupabaseConnector };
+  }) {
     this.eventRepository = ctx.repositories.eventRepository;
+    this.supabaseConnector = ctx.connectors.supabaseConnector;
   }
 
   async createEvent(data: CreateEventReq) {
@@ -32,7 +38,7 @@ export class EventService {
     const parsedData = schema.safeParse(data);
     if (!parsedData.success) {
       const errorMessage = parsedData.error.issues[0].message;
-      throw new Error404({ message: errorMessage });
+      throw new Error400({ message: errorMessage });
     }
 
     return this.eventRepository.createEvent(data);
@@ -42,8 +48,8 @@ export class EventService {
     organizerId,
     categoryEventId,
     status,
-    limit = 10,
-    offset = 0,
+    limit,
+    offset,
     search,
   }: {
     organizerId?: number;
@@ -72,7 +78,7 @@ export class EventService {
     });
     if (!parsedData.success) {
       const errorMessage = parsedData.error.issues[0].message;
-      throw new Error404({ message: errorMessage });
+      throw new Error400({ message: errorMessage });
     }
 
     return this.eventRepository.getEvents({
@@ -93,7 +99,7 @@ export class EventService {
     const parsedData = schema.safeParse({ id });
     if (!parsedData.success) {
       const errorMessage = parsedData.error.issues[0].message;
-      throw new Error404({ message: errorMessage });
+      throw new Error400({ message: errorMessage });
     }
 
     const event = await this.eventRepository.getEventById(id);
@@ -102,6 +108,42 @@ export class EventService {
     }
 
     return event;
+  }
+
+  async updatePutEvent(id: number, data: UpdateEventReq) {
+    const schema = z.object({
+      id: z.number({ required_error: 'Event ID is required' }),
+    });
+
+    const parsedData = schema.safeParse({ id });
+    if (!parsedData.success) {
+      const errorMessage = parsedData.error.issues[0].message;
+      throw new Error400({ message: errorMessage });
+    }
+
+    const result = await this.eventRepository.updatePutEvent(id, data);
+    data.delImages?.forEach(async (image) => {
+      await this.supabaseConnector.deleteFile(image);
+    });
+
+    return result;
+  }
+
+  async updateEventStatus(id: number, status: StatusEvent) {
+    const schema = z.object({
+      id: z.number({ required_error: 'Event ID is required' }),
+      status: z.enum(['open_registration', 'in_progress', 'completed', 'canceled'], {
+        required_error: 'Valid status is required',
+      }),
+    });
+
+    const parsedData = schema.safeParse({ id, status });
+    if (!parsedData.success) {
+      const errorMessage = parsedData.error.issues[0].message;
+      throw new Error400({ message: errorMessage });
+    }
+
+    return await this.eventRepository.updateEventStatus(id, status);
   }
 }
 

@@ -29,6 +29,14 @@ export class SupabaseConnector {
       token: data.token,
     };
   }
+
+  async deleteFile(path: string) {
+    const { error } = await this.supabase.storage.from(this.bucketName).remove([path]);
+    if (error) {
+      console.error('Error deleting file:', error);
+      throw new Error500({ message: 'Error deleting file' });
+    }
+  }
 }
 
 export default SupabaseConnector;

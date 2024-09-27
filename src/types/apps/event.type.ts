@@ -6,3 +6,8 @@ export type CreateEventReq = Omit<
 > & {
   images: string[];
 };
+
+export type UpdateEventReq = Omit<Event, 'id' | 'organizerId' | 'createdAt' | 'updatedAt'> & {
+  newImages: string[];
+  delImages: string[];
+};

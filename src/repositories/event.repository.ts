@@ -1,6 +1,6 @@
 import { Event, Prisma, PrismaClient, StatusEvent } from '@prisma/client';
-import { CreateEventReq } from '../types/apps/event.type';
-import { Error400 } from '../errors/http.errors';
+import { CreateEventReq, UpdateEventReq } from '../types/apps/event.type';
+import { Error400, Error404 } from '../errors/http.errors';
 
 export class EventRepository {
   name = 'eventRepository';
@@ -48,6 +48,7 @@ export class EventRepository {
           });
         }
       }
+      throw error;
     }
   }
 
@@ -135,6 +136,82 @@ export class EventRepository {
         images: true,
       },
     });
+  }
+
+  async updatePutEvent(id: number, data: UpdateEventReq) {
+    const { newImages, delImages, date, ...eventData } = data;
+
+    const eventDate = new Date(date);
+
+    try {
+      const transaction = await this.db.$transaction(async (prisma) => {
+        const updatedEvent = await prisma.event.update({
+          where: { id },
+          data: {
+            ...eventData,
+            date: eventDate,
+          },
+        });
+
+        if (newImages && newImages.length > 0) {
+          const newEventImages = newImages.map((image) => ({
+            eventId: id,
+            value: image,
+          }));
+
+          await prisma.image.createMany({
+            data: newEventImages,
+          });
+        }
+
+        if (delImages && delImages.length > 0) {
+          await prisma.image.deleteMany({
+            where: {
+              eventId: id,
+              value: { in: delImages },
+            },
+          });
+        }
+
+        return updatedEvent;
+      });
+
+      return transaction;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2003') {
+          const fieldName = error.meta?.field_name;
+          throw new Error400({
+            message: `The provided ${fieldName} does not exist, please provide a valid ${fieldName}`,
+          });
+        } else if (error.code === 'P2025') {
+          throw new Error404({
+            message: `Event with id ${id} not found.`,
+          });
+        }
+      }
+      throw error;
+    }
+  }
+
+  async updateEventStatus(id: number, status: StatusEvent) {
+    try {
+      const event = await this.db.event.update({
+        where: { id },
+        data: { status },
+      });
+
+      return event;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new Error404({
+            message: `Event with id ${id} not found.`,
+          });
+        }
+      }
+      throw error;
+    }
   }
 }
 
