@@ -19,7 +19,7 @@ const handler = async (
     const result = await activityService.updateActivityStatus(parseInt(id), status);
 
     res.json({
-      message: 'Activity status updated successfully',
+      message: 'ok',
       data: result,
     });
   } catch (error) {

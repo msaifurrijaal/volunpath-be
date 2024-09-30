@@ -3,13 +3,20 @@ import { ActivityRepository } from '../repositories/activity.repository';
 import { CreateActivityReq } from '../types/apps/activity.type';
 import { Error400 } from '../errors/http.errors';
 import { StatusActivity, StatusPayment } from '@prisma/client';
+import transporter from '../config/mailer';
+import { ConfigProps } from '../config';
 
 export class ActivityService {
   name = 'activityService';
   activityRepository: ActivityRepository;
+  config: ConfigProps;
 
-  constructor(ctx: { repositories: { activityRepository: ActivityRepository } }) {
+  constructor(ctx: {
+    repositories: { activityRepository: ActivityRepository };
+    config: ConfigProps;
+  }) {
     this.activityRepository = ctx.repositories.activityRepository;
+    this.config = ctx.config;
   }
 
   async createActivity(data: CreateActivityReq) {
@@ -118,7 +125,28 @@ export class ActivityService {
       throw new Error400({ message: errorMessage });
     }
 
-    return this.activityRepository.updateActivityStatus(id, parsedData.data.status);
+    const updatedActivityStatus = await this.activityRepository.updateActivityStatus(
+      id,
+      parsedData.data.status,
+    );
+
+    const data = await this.activityRepository.getUserByActivityId(id);
+
+    const mailOptions = {
+      from: this.config.smtpEmail,
+      to: data?.volunteer.email,
+      subject: 'Activity Status Updated',
+      text: `Hallo ${data?.volunteer.fullname},\n\nThe status of activity ID ${id} has been updated to ${parsedData.data.status}.\n\nThank you for using our platform.`,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log('Email sent successfully');
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+
+    return updatedActivityStatus;
   }
 
   async updateActivityPaymentStatus(id: number, statusPayment: StatusPayment) {
@@ -136,7 +164,28 @@ export class ActivityService {
       throw new Error400({ message: errorMessage });
     }
 
-    return this.activityRepository.updateActivityPaymentStatus(id, parsedData.data.statusPayment);
+    const updatedActivityPaymentStatus = await this.activityRepository.updateActivityPaymentStatus(
+      id,
+      parsedData.data.statusPayment,
+    );
+
+    const data = await this.activityRepository.getUserByActivityId(id);
+
+    const mailOptions = {
+      from: this.config.smtpEmail,
+      to: data?.volunteer.email,
+      subject: 'Activity Payment Status Updated',
+      text: `Hallo ${data?.volunteer.fullname},\n\nThe status of activity payment ID ${id} has been updated to ${parsedData.data.statusPayment}.\n\nThank you for using our platform.`,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log('Email sent successfully');
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+
+    return updatedActivityPaymentStatus;
   }
 }
 

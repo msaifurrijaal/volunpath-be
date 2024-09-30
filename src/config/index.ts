@@ -17,6 +17,10 @@ export interface ConfigProps {
     key: string;
     bucketName: string;
   };
+  smtpHost: string;
+  smtpPort: number;
+  smtpEmail: string;
+  smtpAppPassword: string;
 }
 
 export interface jwtProps {
@@ -57,6 +61,10 @@ const config: ConfigProps = {
     key: process.env.SUPABASE_KEY || '',
     bucketName: process.env.SUPABASE_BUCKET_NAME || '',
   },
+  smtpHost: process.env.SMTP_HOST || '',
+  smtpPort: parseInt(process.env.SMTP_PORT || '587'),
+  smtpEmail: process.env.SMTP_EMAIL || '',
+  smtpAppPassword: process.env.SMTP_APP_PASSWORD || '',
 };
 
 export default config;

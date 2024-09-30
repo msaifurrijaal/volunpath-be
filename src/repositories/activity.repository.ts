@@ -136,6 +136,21 @@ export class ActivityRepository {
     });
   }
 
+  async getUserByActivityId(id: number) {
+    return await this.db.activity.findUnique({
+      where: { id },
+      select: {
+        volunteer: {
+          select: {
+            id: true,
+            fullname: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
+
   async updateActivityStatus(id: number, status: StatusActivity) {
     try {
       return await this.db.activity.update({

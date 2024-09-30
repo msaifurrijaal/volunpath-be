@@ -1,53 +1,50 @@
 import { Router } from 'express';
 import { BaseRequest, BaseResponse } from '../../types/common';
-import ActivityService from '../../services/activity.service';
+import ReportService from '../../services/report.service';
 import errorHandler from '../../helpers/errorHandler';
 
 const router = Router();
 
-const handler = async (
-  req: BaseRequest<{ activityService: ActivityService }>,
+export const handler = async (
+  req: BaseRequest<{ reportService: ReportService }>,
   res: BaseResponse,
 ) => {
   try {
-    const { id } = req.params as any;
-    const { status } = req.body;
+    const { id } = req.headers.user as any;
+    const { eventId, feedback } = req.body;
+
     const {
-      services: { activityService },
+      services: { reportService },
     } = req.app;
 
-    const result = await activityService.updateActivityPaymentStatus(parseInt(id), status);
+    const result = await reportService.createReport({
+      eventId,
+      volunteerId: id,
+      feedback,
+    });
 
     res.json({
       message: 'ok',
       data: result,
     });
   } catch (error) {
-    console.error('Error in update activity status handler:', error);
     errorHandler(error, res);
   }
 };
 
 /**
  * @swagger
- * /activities/{id}/payment-status:
- *   patch:
- *     summary: Update activity status
- *     description: Status of activity can be "pending" and "approved" and "canceled"
+ * /reports:
+ *  post:
+ *     summary: Create report
  *     tags:
- *       - Activities
+ *       - Reports
  *     parameters:
  *       - in: header
  *         name: jwt
  *         schema:
  *           type: string
  *         required: true
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: number
- *         description: Activity id
  *     requestBody:
  *       required: true
  *       content:
@@ -55,11 +52,13 @@ const handler = async (
  *           schema:
  *             type: object
  *             properties:
- *               status:
+ *               eventId:
+ *                 type: number
+ *               feedback:
  *                 type: string
  *     responses:
  *       200:
- *         description: Status updated successfully
+ *         description: ok
  *         content:
  *           application/json:
  *             schema:
@@ -81,9 +80,6 @@ const handler = async (
  *                   type: string
  *                   example: Unauthorized
  */
-const patchActivityPaymentStatusRoute = router.patch(
-  '/activities/:id/payment-status',
-  handler as any,
-);
+const postReportRoute = router.post('/reports', handler as any);
 
-export default patchActivityPaymentStatusRoute;
+export default postReportRoute;
