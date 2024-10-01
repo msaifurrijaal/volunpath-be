@@ -40,7 +40,7 @@ export const handler = async (
       skillIds,
     });
 
-    res.json({
+    res.status(201).json({
       message: 'ok',
       data: result,
     });
@@ -92,7 +92,7 @@ export const handler = async (
  *                 items:
  *                   type: number
  *     responses:
- *       200:
+ *       201:
  *         description: Success
  *         content:
  *           application/json:

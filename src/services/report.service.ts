@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import ReportRepository from '../repositories/report.repository';
 import { CreateReportReq } from '../types/apps/report.type';
-import { Error400 } from '../errors/http.errors';
+import { validateSchema } from '../helpers/validateSchema';
 
 export class ReportService {
   name = 'reportService';
@@ -18,11 +18,7 @@ export class ReportService {
       feedback: z.string({ required_error: 'Feedback is required' }),
     });
 
-    const parsedData = schema.safeParse(data);
-    if (!parsedData.success) {
-      const errorMessage = parsedData.error.issues[0].message;
-      throw new Error400({ message: errorMessage });
-    }
+    validateSchema(schema, data);
 
     return this.reportRepository.createReport(data);
   }
@@ -42,11 +38,7 @@ export class ReportService {
       offset: z.number().optional(),
     });
 
-    const parsedData = schema.safeParse({ eventId, limit, offset });
-    if (!parsedData.success) {
-      const errorMessage = parsedData.error.issues[0].message;
-      throw new Error400({ message: errorMessage });
-    }
+    validateSchema(schema, { eventId, limit, offset });
 
     return this.reportRepository.getReports({
       eventId,
@@ -61,13 +53,17 @@ export class ReportService {
       feedback: z.string({ required_error: 'Feedback is required' }),
     });
 
-    const parsedData = schema.safeParse({ id, feedback });
-    if (!parsedData.success) {
-      const errorMessage = parsedData.error.issues[0].message;
-      throw new Error400({ message: errorMessage });
-    }
-
+    validateSchema(schema, { id, feedback });
     return this.reportRepository.updateReport(id, feedback);
+  }
+
+  async deleteReport(id: number) {
+    const schema = z.object({
+      id: z.number({ required_error: 'Report ID is required' }),
+    });
+
+    validateSchema(schema, { id });
+    return this.reportRepository.deleteReport(id);
   }
 }
 

@@ -10,20 +10,13 @@ export const handler = async (
   res: BaseResponse,
 ) => {
   try {
-    const { id } = req.headers.user as any;
-    const { eventId, feedback } = req.body;
-
+    const { id } = req.params as any;
     const {
       services: { reportService },
     } = req.app;
 
-    const result = await reportService.createReport({
-      eventId,
-      volunteerId: id,
-      feedback,
-    });
-
-    res.status(201).json({
+    const result = await reportService.deleteReport(parseInt(id));
+    res.json({
       message: 'ok',
       data: result,
     });
@@ -34,30 +27,26 @@ export const handler = async (
 
 /**
  * @swagger
- * /reports:
- *  post:
- *     summary: Create report
- *     tags:
- *       - Reports
- *     parameters:
- *       - in: header
- *         name: jwt
- *         schema:
- *           type: string
- *         required: true
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               eventId:
- *                 type: number
- *               feedback:
- *                 type: string
- *     responses:
- *       201:
+ * /reports/{id}:
+ *  delete:
+ *    summary: Delete report
+ *    descriptions: Delete report
+ *    tags:
+ *      - Reports
+ *    parameters:
+ *      - in: header
+ *        name: jwt
+ *        schema:
+ *          type: string
+ *        required: true
+ *      - in: path
+ *        name: id
+ *        required: true
+ *        schema:
+ *          type: number
+ *        description: Report id
+ *    responses:
+ *       200:
  *         description: ok
  *         content:
  *           application/json:
@@ -78,8 +67,7 @@ export const handler = async (
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Unauthorized
  */
-const postReportRoute = router.post('/reports', handler as any);
+const deleteReportRoute = router.delete('/reports/:id', handler as any);
 
-export default postReportRoute;
+export default deleteReportRoute;

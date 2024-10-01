@@ -43,7 +43,7 @@ export const handler = async (
       images,
     });
 
-    res.json({
+    res.status(201).json({
       message: 'ok',
       data: result,
     });
@@ -96,7 +96,7 @@ export const handler = async (
  *                 items:
  *                   type: string
  *     responses:
- *       200:
+ *       201:
  *         description: ok
  *         content:
  *           application/json:

@@ -4,9 +4,10 @@ import { jwtSign, jwtVerify } from '../helpers/jwt';
 import config from '../config';
 import UserRepository from '../repositories/user.repository';
 import { JWTObject } from '../types/common';
-import { Error400, Error401 } from '../errors/http.errors';
+import { Error401 } from '../errors/http.errors';
 import { CreateUserOrganizationReq, CreateUserVolunteerReq } from '../types/apps/user.type';
 import { JwtPayload } from 'jsonwebtoken';
+import { validateSchema } from '../helpers/validateSchema';
 
 export class AuthService {
   name = 'authService';
@@ -18,15 +19,17 @@ export class AuthService {
 
   async login(email: string, password: string) {
     const schema = z.object({
-      email: z.string().email({ message: 'Invalid email format!' }),
-      password: z.string().min(1, { message: 'Password is required!' }),
+      email: z
+        .string({ message: 'Email is required!' })
+        .email({ message: 'Invalid email format!' }),
+      password: z
+        .string({
+          message: 'Password is required!',
+        })
+        .min(1, { message: 'Password is required!' }),
     });
 
-    const parsedData = schema.safeParse({ email, password });
-    if (!parsedData.success) {
-      const errorMessage = parsedData.error.issues[0].message;
-      throw new Error400({ message: errorMessage });
-    }
+    validateSchema(schema, { email, password });
 
     const data = await this.userRepository.findUserByEmail(email);
     if (!data) {
@@ -48,14 +51,14 @@ export class AuthService {
 
   async refreshToken(refreshToken: string) {
     const schema = z.object({
-      refreshToken: z.string().min(1, { message: 'Refresh token is required!' }),
+      refreshToken: z
+        .string({
+          message: 'Refresh token is required!',
+        })
+        .min(1, { message: 'Refresh token is required!' }),
     });
 
-    const parsedData = schema.safeParse({ refreshToken });
-    if (!parsedData.success) {
-      const errorMessage = parsedData.error.issues[0].message;
-      throw new Error400({ message: errorMessage });
-    }
+    validateSchema(schema, { refreshToken });
 
     let decodedJwt: JwtPayload;
 
@@ -99,11 +102,7 @@ export class AuthService {
       }),
     });
 
-    const parsedData = schema.safeParse(data);
-    if (!parsedData.success) {
-      const errorMessage = parsedData.error.issues[0].message;
-      throw new Error(`Validation Error: ${errorMessage}`);
-    }
+    validateSchema(schema, data);
 
     return this.userRepository.createUserVolunteer(data);
   }
@@ -140,11 +139,7 @@ export class AuthService {
       }),
     });
 
-    const parsedData = schema.safeParse(data);
-    if (!parsedData.success) {
-      const errorMessage = parsedData.error.issues[0].message;
-      throw new Error(`Validation Error: ${errorMessage}`);
-    }
+    validateSchema(schema, data);
 
     return this.userRepository.createUserOrganization(data);
   }

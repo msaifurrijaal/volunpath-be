@@ -92,6 +92,24 @@ export class ReportRepository {
       throw error;
     }
   }
+
+  async deleteReport(id: number) {
+    try {
+      const report = await this.db.report.delete({
+        where: { id },
+      });
+      return report;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new Error400({
+            message: `Report with id ${id} not found.`,
+          });
+        }
+      }
+      throw error;
+    }
+  }
 }
 
 export default ReportRepository;
