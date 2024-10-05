@@ -17,6 +17,7 @@ export const IGNORED_JWT_PATH = [
   '/reset-password',
   '/email-verification',
   '/firebase/broadcast/android',
+  '/dummy-notification',
 ];
 
 export const IGNORED_JWT_PATH_START_WITH = ['/auth/email-verification'];
