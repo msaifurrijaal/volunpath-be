@@ -10,7 +10,7 @@ const dbConnection = async () => {
 
   try {
     console.log('Connecting to database...');
-    await prisma.$queryRaw`SELECT 1`;
+    // await prisma.$queryRaw`SELECT 1`;
     console.log('Connected to database');
     return prisma;
   } catch (error) {
